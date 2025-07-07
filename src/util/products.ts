@@ -3,7 +3,7 @@ export interface Product {
     popularityScore: number;
     weight: number;
     images: Images;
-    price?: number;
+    price: number | null;
 }
 
 interface Images {
@@ -13,8 +13,8 @@ interface Images {
 }
 
 import axios from "axios";
-const apiUrl = import.meta.env.VITE_API_URL || "https://case-study-anilgvnc-default-rtdb.europe-west1.firebasedatabase.app/";
-const goldPriceApi = "https://api.metalpriceapi.com/v1/latest?api_key=b10a9179365deeaaeb6e9fb24332a246&base=USD&currencies=EUR,XAU";
+const apiUrl = import.meta.env.VITE_APIURL
+const goldPriceApi = import.meta.env.VITE_GOLD_PRICE_API;
 
 
 async function fetchGoldPrice(): Promise<number> {

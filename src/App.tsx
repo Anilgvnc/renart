@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import renartLogo from './assets/renart-logo.png'
-import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa'
+import { FaStar, FaStarHalfAlt, FaRegStar, FaFilter } from 'react-icons/fa'
 import './App.css'
 import { Product, fetchProducts } from './util/products';
 import { CircularProgress } from '@mui/material';
@@ -15,9 +15,13 @@ const colorMap: Record<GoldColor, { label: string; hex: string }> = {
 
 function App() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<GoldColor>("yellow");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +43,18 @@ function App() {
     fetchData();
   }, []);
 
+  const filteredProducts = products.filter((product) => {
+    const nameMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (product.price === null || isNaN(product.price)) return false;
+
+    const priceMatch =
+      (minPrice === null || product.price >= minPrice) &&
+      (maxPrice === null || product.price <= maxPrice);
+
+    return nameMatch && priceMatch;
+  });
+
   const renderStars = (score: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
@@ -56,6 +72,65 @@ function App() {
           <img src={renartLogo} className="logo" alt="Renart logo" />
         </a>
         <h1 className='title'>Product List</h1>
+        <div className='filters'>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className='filter-button'
+          >
+            <FaFilter />
+          </button>
+          {showFilters && (
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginBottom: "20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <input
+                type="text"
+                placeholder="İsme göre ara"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: "8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  minWidth: "200px",
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Min fiyat"
+                onChange={(e) =>
+                  setMinPrice(e.target.value ? parseFloat(e.target.value) : null)
+                }
+                style={{
+                  padding: "8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  width: "100px",
+                }}
+              />
+
+              <input
+                type="number"
+                placeholder="Max fiyat"
+                onChange={(e) =>
+                  setMaxPrice(e.target.value ? parseFloat(e.target.value) : null)
+                }
+                style={{
+                  padding: "8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  width: "100px",
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
       <div id='products' className='products-slider'>
         {loading &&
@@ -66,7 +141,9 @@ function App() {
         }
         {error && <div style={{ color: 'red' }}>Error: {error}</div>}
         {!loading && !error && products.length === 0 && <div>No products found</div>}
-        {products.map((product, index) => (
+
+        {filteredProducts.length === 0 && <p className='product-name'>No suitable product found</p>}
+        {filteredProducts.map((product, index) => (
           <div key={index} className='product-card'>
             <img
               src={product.images[selectedColor]}
@@ -74,7 +151,7 @@ function App() {
               className='product-image'
             />
             <h3 className='product-name'>{product.name}</h3>
-            <p className='product-price'>${product.price?.toFixed(2)}</p>
+            <p className='product-price'>{product.price !== null ? `$${product.price.toFixed(2)}` : "Fiyat Yok"}</p>
 
             <div style={{ display: "flex", gap: "8px", margin: "8px 0" }}>
               {(["yellow", "white", "rose"] as GoldColor[]).map((color) => (
