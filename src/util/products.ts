@@ -13,8 +13,8 @@ interface Images {
 }
 
 import axios from "axios";
-const apiUrl = import.meta.env.VITE_APIURL
-const goldPriceApi = import.meta.env.VITE_GOLD_PRICE_API;
+const apiUrl = "https://case-study-anilgvnc-default-rtdb.europe-west1.firebasedatabase.app/"
+const goldPriceApi = "https://api.metalpriceapi.com/v1/latest?api_key=b10a9179365deeaaeb6e9fb24332a246&base=USD&currencies=EUR,XAU"
 
 
 async function fetchGoldPrice(): Promise<number> {
